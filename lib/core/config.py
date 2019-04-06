@@ -403,6 +403,12 @@ __C.MODEL.CONV_BODY = ''
 # E.g., 81 for COCO (80 foreground + 1 background)
 __C.MODEL.NUM_CLASSES = -1
 
+# The type of bounding box regression loss to train on
+__C.MODEL.LOSS_TYPE = 'smooth_l1'
+
+# The weight of the final bounding box refinement loss
+__C.MODEL.LOSS_BBOX_WEIGHT = 1.
+
 # Use a class agnostic bounding box regressor instead of the default per-class
 # regressor
 __C.MODEL.CLS_AGNOSTIC_BBOX_REG = False
