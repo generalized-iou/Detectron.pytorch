@@ -36,9 +36,12 @@ def bbox_transform(deltas, weights):
 
 
 def compute_iou(output, target, bbox_inside_weights, bbox_outside_weights,
-                transform_weights=None):
+                transform_weights=None, batch_size=None):
     if transform_weights is None:
         transform_weights = (1., 1., 1., 1.)
+
+    if batch_size is None:
+        batch_size = output.size(0)
 
     x1, y1, x2, y2 = bbox_transform(output, transform_weights)
     x1g, y1g, x2g, y2g = bbox_transform(target, transform_weights)
@@ -65,8 +68,8 @@ def compute_iou(output, target, bbox_inside_weights, bbox_outside_weights,
     area_c = (xc2 - xc1) * (yc2 - yc1) + 1e-7
     miouk = iouk - ((area_c - unionk) / area_c)
     iou_weights = bbox_inside_weights.view(-1, 4).mean(1) * bbox_outside_weights.view(-1, 4).mean(1)
-    iouk = ((1 - iouk) * iou_weights).sum(0) / output.size(0)
-    miouk = ((1 - miouk) * iou_weights).sum(0) / output.size(0)
+    iouk = ((1 - iouk) * iou_weights).sum(0) / batch_size
+    miouk = ((1 - miouk) * iou_weights).sum(0) / batch_size
 
     return iouk, miouk
 

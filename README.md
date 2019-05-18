@@ -20,22 +20,24 @@ This repository is a fork of [roytseng-tw/Detectron.pytorch](https://github.com/
 
 ### Losses
 
-The loss can be chosen with the `MODEL.LOSS_TYPE` option in the configuration file. The valid options are currently: `[iou|giou|sl1]`. At this moment, we apply bounding box loss only on final bounding box refinement layer, just as in the paper.
+The type of bounding box loss can be configured in the configuration file as following. `MODEL.LOSS_TYPE` configures the final bounding box refinement loss. `MODEL.RPN_LOSS_TYPE` determines the type of the RPN bounding box loss. The valid options are currently: `[iou|giou|sl1]`.
 
 ```
 MODEL:
   LOSS_TYPE: 'iou'
+  RPN_LOSS_TYPE: 'iou'
 ```
 
 Please take a look at `compute_iou` function of [lib/utils/net.py](lib/utils/net.py) for our GIoU and IoU loss implementation in PyTorch.
 
 ### Normalizers
 
-We also implement a normalizer of final bounding box refinement loss. This can be specified with the `MODEL.LOSS_BBOX_WEIGHT` parameter in the configuration file. The default value is `1.0`. We use `MODEL.LOSS_BBOX_WEIGHT` of `10.` for IoU and GIoU experiments.
+We also implement a normalizer of bounding box refinement losses. This can be specified with the `MODEL.LOSS_BBOX_WEIGHT` and `MODEL.RPN_LOSS_BBOX_WEIGHT` parameters in the configuration file. The default value is `1.0`. We use `MODEL.LOSS_BBOX_WEIGHT` of `10.` for IoU and GIoU experiments in the paper.
 
 ```
 MODEL:
   LOSS_BBOX_WEIGHT: 10.
+  RPN_LOSS_BBOX_WEIGHT: 1.
 ```
 
 ### Network Configurations
@@ -64,7 +66,9 @@ Here are the trained models using the configurations in this repository.
 
  - [Faster RCNN + SmoothL1](https://giou.stanford.edu/rcnn_weights/faster_sl1.pth)
  - [Faster RCNN + IoU](https://giou.stanford.edu/rcnn_weights/faster_iou.pth)
+ - [Faster RCNN + RPN IoU loss + IoU](https://giou.stanford.edu/rcnn_weights/faster_rpn_iou.pth)
  - [Faster RCNN + GIoU](https://giou.stanford.edu/rcnn_weights/faster_giou.pth)
+ - [Faster RCNN + RPN GIoU loss + GIoU](https://giou.stanford.edu/rcnn_weights/faster_rpn_giou.pth)
  - [Mask RCNN + SmoothL1](https://giou.stanford.edu/rcnn_weights/mask_sl1.pth)
  - [Mask RCNN + IoU](https://giou.stanford.edu/rcnn_weights/mask_iou.pth)
  - [Mask RCNN + GIoU](https://giou.stanford.edu/rcnn_weights/mask_giou.pth)

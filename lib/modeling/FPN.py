@@ -452,13 +452,28 @@ def fpn_rpn_losses(**kwargs):
         # Normalization by (1) RPN_BATCH_SIZE_PER_IM and (2) IMS_PER_BATCH is
         # handled by (1) setting bbox outside weights and (2) SmoothL1Loss
         # normalizes by IMS_PER_BATCH
-        loss_rpn_bbox_fpn = net_utils.smooth_l1_loss(
+        sl1_loss_rpn_bbox_fpn = net_utils.smooth_l1_loss(
             kwargs['rpn_bbox_pred_fpn' + slvl], rpn_bbox_targets_fpn,
             rpn_bbox_inside_weights_fpn, rpn_bbox_outside_weights_fpn,
             beta=1/9)
+        iou_loss_rpn_bbox_fpn, giou_loss_rpn_bbox_fpn = net_utils.compute_iou(
+            kwargs['rpn_bbox_pred_fpn' + slvl].permute(0, 2, 3, 1).reshape(-1, 4),
+            rpn_bbox_targets_fpn.permute(0, 2, 3, 1).reshape(-1, 4),
+            rpn_bbox_inside_weights_fpn.permute(0, 2, 3, 1).reshape(-1, 4),
+            rpn_bbox_outside_weights_fpn.permute(0, 2, 3, 1).reshape(-1, 4),
+            batch_size=cfg.TRAIN.IMS_PER_BATCH)
+
+        if cfg.MODEL.RPN_LOSS_TYPE == 'smooth_l1':
+            loss_rpn_bbox_fpn = sl1_loss_rpn_bbox_fpn
+        elif cfg.MODEL.RPN_LOSS_TYPE == 'iou':
+            loss_rpn_bbox_fpn = iou_loss_rpn_bbox_fpn
+        elif cfg.MODEL.RPN_LOSS_TYPE == 'giou':
+            loss_rpn_bbox_fpn = giou_loss_rpn_bbox_fpn
+        else:
+            raise ValueError('Invalid loss type: ' + cfg.MODEL.RPN_LOSS_TYPE)
 
         losses_cls.append(loss_rpn_cls_fpn)
-        losses_bbox.append(loss_rpn_bbox_fpn)
+        losses_bbox.append(loss_rpn_bbox_fpn * cfg.MODEL.RPN_LOSS_BBOX_WEIGHT)
 
     return losses_cls, losses_bbox
 
